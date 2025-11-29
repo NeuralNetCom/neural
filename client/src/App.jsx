@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, createContext, useContext } from 'react';
+import { createRoot } from 'react-dom/client'; // ВАЖНО: Импорт для запуска приложения
 import { 
   User, MessageSquare, Home, Settings, Shield, Send, MoreHorizontal, 
   Heart, Share2, Activity, LogOut, Globe, Lock, Bell, X, Edit3, 

@@ -11,17 +11,27 @@ import axios from 'axios';
 
 // --- КОНФИГУРАЦИЯ ---
 // Автоматическое переключение между локальным сервером и Render
-const API_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-    ? 'http://localhost:5000/api'
-    : 'https://neural-upqo.onrender.com/api'; // Твой сервер на Render
+// Если адрес сайта localhost, то используем локальный сервер. Иначе - сервер на Render.
+const getApiUrl = () => {
+    const hostname = window.location.hostname;
+    if (hostname === 'localhost' || hostname === '127.0.0.1') {
+        return 'http://localhost:5000/api';
+    }
+    // Сюда вставь URL твоего БЭКЕНДА (сервера), который мы деплоили первым
+    return 'https://neural-upqo.onrender.com/api'; 
+};
+
+const API_URL = getApiUrl();
 
 /**
  * --- УТИЛИТЫ ---
  */
 const cn = (...classes) => classes.filter(Boolean).join(' ');
 
+// Функция форматирования времени (исправленная UTC проблема)
 const formatLastSeen = (isoString) => {
     if (!isoString) return "Не в сети";
+    // Добавляем Z для корректного учета UTC времени сервера
     const date = new Date(isoString.endsWith('Z') ? isoString : isoString + 'Z');
     const now = new Date();
     const diffSeconds = Math.floor((now - date) / 1000); 
@@ -38,6 +48,7 @@ const formatLastSeen = (isoString) => {
  * --- КОМПОНЕНТЫ ---
  */
 
+// Твой 3D Куб
 const Cube3D = ({ size = "128px", small = false }) => {
     return (
         <div className={cn("perspective-800 relative mx-auto", small ? "w-16 h-16 my-2" : "w-32 h-32 my-8 animate-[float_6s_ease-in-out_infinite]")}>
@@ -112,7 +123,7 @@ const Toast = ({ message, onClose }) => {
     );
 };
 
-// --- CONTEXT ---
+// --- CONTEXT (Управление данными) ---
 const AppContext = createContext(null);
 
 const AppProvider = ({ children }) => {
@@ -123,14 +134,17 @@ const AppProvider = ({ children }) => {
   const [notification, setNotification] = useState(null);
   const [friendRequests, setFriendRequests] = useState([]);
   
+  // Музыка
   const [currentTrack, setCurrentTrack] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [playlist, setPlaylist] = useState([]); 
   const [volume, setVolume] = useState(0.5);
   
+  // Чат
   const [activeChat, setActiveChat] = useState(null);
   const lastMsgIdRef = useRef(null);
 
+  // Авто-вход
   useEffect(() => {
     if (token) {
         axios.post(`${API_URL}/login`, { code: token })
@@ -144,16 +158,17 @@ const AppProvider = ({ children }) => {
     }
   }, []);
 
-  // KEEP ALIVE (Будильник для сервера)
+  // KEEP ALIVE (Чтобы сервер не спал)
   useEffect(() => {
       const keepAliveInterval = setInterval(() => {
           const endpoint = token ? '/users/me' : '/health'; 
           const headers = token ? { Authorization: token } : {};
           axios.get(`${API_URL}${endpoint}`, { headers }).catch(err => console.error("Keep-alive failed", err));
-      }, 600000); 
+      }, 600000); // 10 минут
       return () => clearInterval(keepAliveInterval);
   }, [token]);
 
+  // Проверка сообщений
   useEffect(() => {
       if (!token || !user) return;
       const runPolling = async () => {
@@ -802,7 +817,7 @@ const App = () => {
     <div className="relative min-h-screen bg-[#f3f4f6] text-gray-800 font-sans overflow-x-hidden selection:bg-cyan-200">
       <div className="fixed top-0 left-0 w-full h-full -z-10 pointer-events-none bg-gradient-to-br from-gray-50 to-gray-200"></div>
       {!user ? <LoginView /> : <><MainLayout /><MobileNav /></>}
-    </div>
+    </div>Å
   );
 };
 

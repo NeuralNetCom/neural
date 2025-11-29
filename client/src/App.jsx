@@ -13,7 +13,7 @@ import axios from 'axios';
 // Если адрес сайта localhost, то используем локальный сервер. Иначе - сервер на Render.
 const API_URL = (window.location.hostname === 'https://neural-upqo.onrender.com' || window.location.hostname === '127.0.0.1')
     ? 'http://localhost:5000/api'
-    : 'https://neural-upqo.onrender.com/api'; // <-- ВАЖНО: Сюда вставь URL своего сервера с Render после деплоя
+    : 'https://neural-upqo.onrender.com'; // <-- ВАЖНО: Сюда вставь URL своего сервера с Render после деплоя
 
 /**
  * --- УТИЛИТЫ ---

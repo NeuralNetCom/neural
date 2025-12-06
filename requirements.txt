@@ -1,6 +1,7 @@
 flask
-flask-sqlalchemy
-flask-cors
+flask_sqlalchemy
+flask_cors
 psycopg2-binary
+requests
 gunicorn
 werkzeug

@@ -1,3 +1,6 @@
+import threading
+import time
+import requests
 import os
 import random
 import string
@@ -590,9 +593,36 @@ def health_check():
     return jsonify({'status': 'ok'}), 200
 
 if __name__ == '__main__':
-    # ВАЖНО: Создание таблиц при запуске (чтобы на Render БД создалась)
+    # --- ФУНКЦИЯ SELF-PING (БОТ ДЛЯ АКТИВНОСТИ) ---
+def keep_alive_ping():
+    """
+    Фоновый процесс, который отправляет запрос на сервер каждые 14 минут,
+    чтобы предотвратить его засыпание на Render (лимит 15 минут).
+    """
+    # ВАЖНО: Замените URL на ваш реальный адрес на Render
+    # Судя по скриншоту, это: https://neural-upqo.onrender.com
+    base_url = os.environ.get('RENDER_EXTERNAL_URL') or "https://neural-upqo.onrender.com"
+    ping_url = f"{base_url}/api/health"
+
+    print(f"--- Keep-Alive Bot started targeting: {ping_url} ---")
+    
+    while True:
+        time.sleep(840) # 840 секунд = 14 минут
+        try:
+            response = requests.get(ping_url)
+            print(f"Ping sent to keep alive: Status {response.status_code}")
+        except Exception as e:
+            print(f"Ping failed: {e}")
+
+if __name__ == '__main__':
+    # ВАЖНО: Создание таблиц при запуске
     with app.app_context():
         db.create_all()
         seed_music_db()
+    
+    # Запускаем бота в отдельном потоке
+    # daemon=True означает, что поток закроется, если упадет основной сервер
+    threading.Thread(target=keep_alive_ping, daemon=True).start()
+
     print("--- NEURAL SERVER STARTED ON PORT 5000 ---")
-    app.run(debug=True, port=5000)
+    app.run(debug=True, port=5000) # use_reloader=False можно добавить если будет двоиться

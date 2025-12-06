@@ -588,9 +588,6 @@ def like_track(track_id):
     return jsonify({'isLiked': liked})
 
 # --- НОВЫЙ ENDPOINT ДЛЯ KEEP-ALIVE ---
-@app.route('/api/health', methods=['GET'])
-def health_check():
-    return jsonify({'status': 'ok'}), 200
 
 @app.route('/api/health', methods=['GET'])
 def health_check():
